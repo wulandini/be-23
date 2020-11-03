@@ -1,84 +1,82 @@
 package controller
 
-import {
+import (
 	"net/http"
 
+	"github.com/dianrahmaji/digitalent-be-23/app/model"
 	"github.com/gin-gonic/gin"
-}
+)
 
-
-/AddAntrianHandler is a function to add queue
+// AddAntrianHandler is a function to add new antrian
 func AddAntrianHandler(c *gin.Context) {
-	flag, err := addAntrian()
-
+	flag, err := model.AddAntrian()
 	if flag {
 		c.JSON(http.StatusOK, map[string]interface{}{
-			"status": "success"
+			"status": "success",
 		})
 	} else {
 		c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"status": "failed".
-			"error": err,
+			"status": "failed",
+			"error":  err,
 		})
 	}
 }
 
-//GetAntrianHandler is a function to add queue
+// GetAntrianHandler is a function to get all antrian
 func GetAntrianHandler(c *gin.Context) {
-	flag, data, err := getAntrian()
+	flag, resp, err := model.GetAntrian()
 
 	if flag {
 		c.JSON(http.StatusOK, map[string]interface{}{
 			"status": "success",
-			"data": data,
+			"data":   resp,
 		})
-	}else {
+	} else {
 		c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"status": "failed".
-			"error": err,
+			"status": "failed",
+			"error":  err,
 		})
 	}
 }
 
-//UpdateAntrianHandler is a function to add queue
+// UpdateAntrianHandler is a function to update an antrian
 func UpdateAntrianHandler(c *gin.Context) {
 	idAntrian := c.Param("idAntrian")
-	flag, err := updateAntrian(idAntian)
+	flag, err := model.UpdateAntrian(idAntrian)
 
 	if flag {
 		c.JSON(http.StatusOK, map[string]interface{}{
 			"status": "success",
-			"data": data,
 		})
-	}else {
+	} else {
 		c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"status": "failed".
-			"error": err,
+			"status": "failed",
+			"error":  err,
 		})
 	}
 }
 
-//DeleteAntrianHandler is a function to add queue
+// DeleteAntrianHandler is a function to delete an antrian
 func DeleteAntrianHandler(c *gin.Context) {
 	idAntrian := c.Param("idAntrian")
-	flag, err := deleteAntrian(idAntian)
+	flag, err := model.DeleteAntrian(idAntrian)
 
 	if flag {
 		c.JSON(http.StatusOK, map[string]interface{}{
-			"status": "success",
+			"status": "status",
 		})
-	}else {
+	} else {
 		c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"status": "failed".
-			"error": err,
+			"status": "failed",
+			"error":  err,
 		})
 	}
 }
 
-//PageAntrianHandler is a function to serve HTML
-func PageAntrianHandler(c *gin.Context){
-	flag, result, err := getAntrian()
-	var currentAntrian map [string]interface{}
+// PageAntrianHandler is a function to serve HTML
+func PageAntrianHandler(c *gin.Context) {
+	flag, result, err := model.GetAntrian()
+	var currentAntrian map[string]interface{}
 
 	for _, item := range result {
 		if item != nil {
@@ -88,13 +86,13 @@ func PageAntrianHandler(c *gin.Context){
 	}
 
 	if flag && len(result) > 0 {
-		c.HTML(http.statusOK, "index.html", gin.H{
+		c.HTML(http.StatusOK, "index.html", gin.H{
 			"antrian": currentAntrian["id"],
 		})
 	} else {
 		c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"status": "failed",
-			"error" : err,
+			"error":  err,
 		})
 	}
 }
