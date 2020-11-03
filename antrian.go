@@ -8,86 +8,78 @@ import (
 	"firebase.google.com/go/db"
 )
 
-//Antrian describe queue
-type Antian stuct {
-	ID string `json:"id"`
-	status bool `json:"status"`
+// Antrian defines the queue
+type Antrian struct {
+	ID     string `json:"id"`
+	Status bool   `json:"status"`
 }
 
+// AddAntrian is a function to add new queue
 func AddAntrian() (bool, error) {
-	_, dataAntrian, _ := getAntrian()
+	_, dataAntrian, _ := GetAntrian()
 	var ID string
-	var antrianRef = *db.ref
+	var antrianRef *db.Ref
 	ref := client.NewRef("antrian")
 
 	if dataAntrian == nil {
 		ID = fmt.Sprintf("B-0")
 		antrianRef = ref.Child("0")
 	} else {
-		ID = fmt.Sprintf("B-%d" len(dataAntrian))
-		antrianRef = ref.child(fmt.Sprintf("%d"), len(dataAntrian))
+		ID = fmt.Sprintf("B-%d", len(dataAntrian))
+		antrianRef = ref.Child(fmt.Sprintf("%d", len(dataAntrian)))
 	}
 
-	antrian := Antrian {
-		ID: ID,
+	antrian := Antrian{
+		ID:     ID,
 		Status: false,
 	}
 
-	if err := antrianRef.Set(ctx, antrian); err != {
-		log.fatal(err)
-		return false, error
+	if err := antrianRef.Set(ctx, antrian); err != nil {
+		log.Fatal(err)
+		return false, err
 	}
 	return true, nil
 }
-//GetAntrianHandler is a function to add queue
-func GetAntrianHandler(c *gin.Context) {
-	flag, data, err := getAntrian()
 
-	if flag {
-		c.JSON(http.StatusOK, map[string]interface{}{
-			"status": "success",
-			"data": data,
-		})
-	}else {
-		c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"status": "failed".
-			"error": err,
-		})
+// GetAntrian is a function to get all queue
+func GetAntrian() (bool, []map[string]interface{}, error) {
+	var data []map[string]interface{}
+	ref := client.NewRef("antrian")
+	if err := ref.Get(ctx, &data); err != nil {
+		log.Fatalln("Error reading from database", err)
+		return false, nil, err
 	}
+
+	return true, data, nil
 }
 
-//UpdateAntrianHandler is a function to add queue
-func UpdateAntrianHandler(c *gin.Context) {
-	idAntrian := c.Param("idAntrian")
-	flag, err := updateAntrian(idAntian)
-
-	if flag {
-		c.JSON(http.StatusOK, map[string]interface{}{
-			"status": "success",
-			"data": data,
-		})
-	}else {
-		c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"status": "failed".
-			"error": err,
-		})
+// UpdateAntrian is a function to update
+func UpdateAntrian(idAntrian string) (bool, error) {
+	ref := client.NewRef("antrian")
+	id := strings.Split(idAntrian, "-")
+	childRef := ref.Child(id[1])
+	antrian := Antrian{
+		ID:     idAntrian,
+		Status: true,
 	}
+
+	if err := childRef.Set(ctx, antrian); err != nil {
+		log.Fatal(err)
+		return false, err
+	}
+
+	return true, nil
 }
 
-//DeleteAntrianHandler is a function to add queue
-func DeleteAntrianHandler(c *gin.Context) {
-	idAntrian := c.Param("idAntrian")
-	flag, err := deleteAntrian(idAntian)
-
-	if flag {
-		c.JSON(http.StatusOK, map[string]interface{}{
-			"status": "success",
-			"data": data,
-		})
-	}else {
-		c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"status": "failed".
-			"error": err,
-		})
+// DeleteAntrian is a function to delete new queue
+func DeleteAntrian(idAntrian string) (bool, error) {
+	ref := client.NewRef("antrian")
+	id := strings.Split(idAntrian, "-")
+	childRef := ref.Child(id[1])
+	if err := childRef.Delete(ctx); err != nil {
+		log.Fatal(err)
+		return false, err
 	}
+
+	return true, nil
 }
